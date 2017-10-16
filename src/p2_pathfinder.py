@@ -29,11 +29,13 @@ def find_path (source_point, destination_point, mesh):
     ## implement BFS to see if a possible path exists
     queue = []
     visited = []
+    path_exists = False
     queue.append(source_box);
     while(queue):
       node = queue.pop()
       if(node == dest_box):
         print("Path exists!")
+        path_exists = True
       else:
         ## show we visited this node
         visited.append(node)
@@ -51,7 +53,10 @@ def find_path (source_point, destination_point, mesh):
             queue.append(neighboor)
       
       
-    
+    if path_exists = False:
+      print("No path possible")
+      return path, boxes.keys()
+
     
 
     return path, boxes.keys()

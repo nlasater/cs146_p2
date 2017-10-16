@@ -72,42 +72,44 @@ def find_path(source_point, destination_point, mesh):
 
         # now look for neighboors and add to queue
         for neighboor in mesh['adj'][box]:
-            max_x = max(box[2],neighboor[2])
-            min_x = min(box[3],neighboor[3])
-
-            max_y = max(box[0],neighboor[0])
-            min_y = min(box[1],neighboor[1])
-
             nx = None
             ny = None
-            if max_x <= detail_points[box][0] and detail_points[box][0] <= min_x:
-                nx = detail_points[box][0]
-            elif max_x < detail_points[box][0]:
-                nx = max_x
+            if neighboor == dest_box:
+                nx = destination_point[1]
+                ny = destination_point[0]
             else:
-                nx = min_x
+                max_x = max(box[2],neighboor[2])
+                min_x = min(box[3],neighboor[3])
 
-            if max_y <= detail_points[box][1] and detail_points[box][1] <= min_y:
-                ny = detail_points[box][1]
-            elif max_y < detail_points[box][1]:
-                ny = max_y
-            else:
-                ny = min_y
+                max_y = max(box[0],neighboor[0])
+                min_y = min(box[1],neighboor[1])
+
+                if max_x <= detail_points[box][0] and detail_points[box][0] <= min_x:
+                    nx = detail_points[box][0]
+                elif max_x > detail_points[box][0]:
+                    nx = max_x
+                else:
+                    nx = min_x
+
+                if max_y <= detail_points[box][1] and detail_points[box][1] <= min_y:
+                    ny = detail_points[box][1]
+                elif max_y > detail_points[box][1]:
+                    ny = max_y
+                else:
+                    ny = min_y
 
             detail_points[neighboor] = (nx,ny)
 
-            print(neighboor)
-            print(prev[neighboor])
 
-            #heuristic = math.sqrt((detail_points[dest_box][1] - detail_points[neighboor][1])**2 + (detail_points[dest_box][0] - detail_points[neighboor][0])**2)
-            alt = math.sqrt((detail_points[box][1] - detail_points[neighboor][1])**2 + (detail_points[box][0] - detail_points[neighboor][0])**2)
-            #alt = math.sqrt((detail_points[prev[neighboor]][1] - detail_points[neighboor][1])**2
-            #              + (detail_points[prev[neighboor]][0] - detail_points[neighboor][0])**2)
+            heuristic = math.sqrt((detail_points[dest_box][1] - detail_points[neighboor][1])**2
+                                + (detail_points[dest_box][0] - detail_points[neighboor][0])**2)
+            alt = math.sqrt((detail_points[box][1] - detail_points[neighboor][1])**2
+                          + (detail_points[box][0] - detail_points[neighboor][0])**2)
 
-            if dist[neighboor] > dist[box] + alt: # + heuristic:
+            if dist[neighboor] > dist[box] + alt + heuristic:
                 if neighboor not in visited and dist[neighboor] == math.inf:
-                    heappush(queue,(current_dist + alt, neighboor))
-                dist[neighboor] = alt
+                    heappush(queue,(dist[box] + alt + heuristic, neighboor))
+                dist[neighboor] = alt + dist[box]
                 prev[neighboor] = box
 
     if dist[dest_box] == math.inf:
@@ -115,17 +117,22 @@ def find_path(source_point, destination_point, mesh):
         return None
     else:
         print("entered?")
-
         shortpath = []
-        w = box
+        w = dest_box
         last = prev[w]
-        shortpath.append((detail_points[w],detail_points[last]))
+        shortpath.append(((detail_points[last][1], detail_points[last][0]), (detail_points[w][1], detail_points[w][0])))
 
-        while dist[w] != 0:
+        while w != source_box:
+            #print(w)
             w = prev[last]
-            shortpath.append((detail_points[last], detail_points[prev[last]]))
+            shortpath.append(((detail_points[last][1], detail_points[last][0]), (detail_points[w][1], detail_points[w][0])))
             last = w
 
+        shortpath.append(((detail_points[w][1], detail_points[w][0]), (source_point[0], source_point[1])))
         shortpath.reverse()
+        print(shortpath)
+        print(source_point)
+        print(detail_points[w])
+        print(destination_point)
 
         return shortpath, visited

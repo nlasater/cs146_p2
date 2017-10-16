@@ -3,7 +3,7 @@ from heapq import heappop, heappush
 import math
 
 
-def find_path (source_point, destination_point, mesh):
+def find_path(source_point, destination_point, mesh):
     """
     Searches for a path from source_point to destination_point through the mesh
 
@@ -17,14 +17,14 @@ def find_path (source_point, destination_point, mesh):
     """
     path = []
     boxes = {}
-    source_box = None;
-    dest_box = None;
+    source_box = None
+    dest_box = None
 
-    print("Destination point: ")
-    print(destination_point)
+#    print("Destination point: ")
+#    print(destination_point)
 
-    print("Source point: ")
-    print(source_point)
+#    print("Source point: ")
+#    print(source_point)
 
     ## find location of src and dest point
     for element in mesh['boxes']:
@@ -35,7 +35,6 @@ def find_path (source_point, destination_point, mesh):
  #     if int(element[0]) < destination_point[1] and int(element[1]) > destination_point[1] and int(element[2]) < destination_point[0] and int(element[3]) > destination_point[0]:
  #       dest_box = element
  #       print("We found the dest in box: " + str(dest_box))    for element in mesh['boxes']:
-
         if int(element[0]) < source_point[0] and int(element[1]) > source_point[0] and int(element[2]) < source_point[1] and int(element[3]) > source_point[1]:
             source_box = element
             #print("We found the src in box: " + str(source_box))
@@ -44,11 +43,9 @@ def find_path (source_point, destination_point, mesh):
             dest_box = element
             #print("We found the dest in box: " + str(dest_box))
 
-
     queue = []
     visited = []
     detail_points = {}
-    path = []
 
     dist = {}
     prev = {}
@@ -57,14 +54,15 @@ def find_path (source_point, destination_point, mesh):
         dist[square] = math.inf
         prev[square] = None
 
-    dist[source_box] = 0
     detail_points[source_box] = (source_point[1],source_point[0])
     detail_points[dest_box] = (destination_point[1],destination_point[0])
+    dist[source_box] = 0
     heappush(queue,(0,source_box))
 
-    while(queue):
+    while queue != []:
         node = heappop(queue)
         box = node[1]
+        current_dist = node[0]
 
         if box == dest_box:
             print("Path exists!")
@@ -74,40 +72,60 @@ def find_path (source_point, destination_point, mesh):
 
         # now look for neighboors and add to queue
         for neighboor in mesh['adj'][box]:
-            y = (int(neighboor[1]) + int(neighboor[0])) / 2
-            x = (int(neighboor[3]) + int(neighboor[2])) / 2
-            detail_points[neighboor] = (x,y)
+            max_x = max(box[2],neighboor[2])
+            min_x = min(box[3],neighboor[3])
 
-            heuristic = math.sqrt((detail_points[dest_box][1] - detail_points[neighboor][1])**2 + (detail_points[dest_box][0] - detail_points[neighboor][0])**2)
-            alt = math.sqrt((detail_points[source_box][1] - detail_points[neighboor][1])**2 + (detail_points[source_box][0] - detail_points[neighboor][0])**2)
-            if dist[neighboor] > alt + heuristic:
+            max_y = max(box[0],neighboor[0])
+            min_y = min(box[1],neighboor[1])
+
+            nx = None
+            ny = None
+            if max_x <= detail_points[box][0] and detail_points[box][0] <= min_x:
+                nx = detail_points[box][0]
+            elif max_x < detail_points[box][0]:
+                nx = max_x
+            else:
+                nx = min_x
+
+            if max_y <= detail_points[box][1] and detail_points[box][1] <= min_y:
+                ny = detail_points[box][1]
+            elif max_y < detail_points[box][1]:
+                ny = max_y
+            else:
+                ny = min_y
+
+            detail_points[neighboor] = (nx,ny)
+
+            print(neighboor)
+            print(prev[neighboor])
+
+            #heuristic = math.sqrt((detail_points[dest_box][1] - detail_points[neighboor][1])**2 + (detail_points[dest_box][0] - detail_points[neighboor][0])**2)
+            alt = math.sqrt((detail_points[box][1] - detail_points[neighboor][1])**2 + (detail_points[box][0] - detail_points[neighboor][0])**2)
+            #alt = math.sqrt((detail_points[prev[neighboor]][1] - detail_points[neighboor][1])**2
+            #              + (detail_points[prev[neighboor]][0] - detail_points[neighboor][0])**2)
+
+            if dist[neighboor] > dist[box] + alt: # + heuristic:
                 if neighboor not in visited and dist[neighboor] == math.inf:
-                    heappush(queue,(alt + heuristic, neighboor))
+                    heappush(queue,(current_dist + alt, neighboor))
                 dist[neighboor] = alt
                 prev[neighboor] = box
-
-        #print(len(queue))
-        #print(queue)
 
     if dist[dest_box] == math.inf:
         print("No path found")
         return None
     else:
         print("entered?")
+
         shortpath = []
-        #oshortpath = []
-        shortpath.append(box)
-        #oshortpath.append(detail_points[box])
         w = box
+        last = prev[w]
+        shortpath.append((detail_points[w],detail_points[last]))
+
         while dist[w] != 0:
-            print(prev[w])
-            shortpath.append(prev[w])
-            #oshortpath.append(detail_points[w])
-            w = prev[w]
+            w = prev[last]
+            shortpath.append((detail_points[last], detail_points[prev[last]]))
+            last = w
+
         shortpath.reverse()
-        #oshortpath.reverse()
-        print(shortpath)
-        print()
-        #print(oshortpath)
-        print()
+
         return shortpath, visited

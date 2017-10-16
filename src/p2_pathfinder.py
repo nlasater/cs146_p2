@@ -16,25 +16,15 @@ def find_path (source_point, destination_point, mesh):
     source_box = None;
     dest_box = None;
     
-    ## find location of src point
+    ## find location of src and dest point
     for element in mesh['boxes']:
-      if int(element[0]) < source_point[0]:
-        if int(element[1]) < source_point[1]:
-          if int(element[2]) > source_point[0]:
-            if int(element[3]) > source_point[1]:
-              print("We found the src in box: " + str(element))
-              source_box = element
-      print("not the source!")
-      
-    ## find location of dest point
-    for element in mesh['boxes']:
-      if int(element[0]) < destination_point[0]:
-        if int(element[1]) < destination_point[1]:
-          if int(element[2]) > destination_point[0]:
-            if int(element[3]) > destination_point[1]:
-              print("We found the destination_point in box: " + str(element))
-              dest_box = element
-      print("not the destination_point!")
+      if int(element[0]) < source_point[1] and int(element[1]) > source_point[1] and int(element[2]) < source_point[0] and int(element[3]) > source_point[0]:
+        source_box = element
+        print("We found the src in box: " + str(source_box))
+      if int(element[0]) < destination_point[1] and int(element[1]) > destination_point[1] and int(element[2]) < destination_point[0] and int(element[3]) > destination_point[0]:
+        dest_box = element
+        print("We found the dest in box: " + str(dest_box))
+      ##print("not the destination!")
     
    
 

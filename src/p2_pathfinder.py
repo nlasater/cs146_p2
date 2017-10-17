@@ -20,21 +20,8 @@ def find_path(source_point, destination_point, mesh):
     source_box = None
     dest_box = None
 
-#    print("Destination point: ")
-#    print(destination_point)
-
-#    print("Source point: ")
-#    print(source_point)
-
     ## find location of src and dest point
     for element in mesh['boxes']:
- #     if int(element[0]) < source_point[1] and int(element[1]) > source_point[1] and int(element[2]) < source_point[0] and int(element[3]) > source_point[0]:
- #       source_box = element
- #       print("We found the src in box: " + str(source_box))
-        
- #     if int(element[0]) < destination_point[1] and int(element[1]) > destination_point[1] and int(element[2]) < destination_point[0] and int(element[3]) > destination_point[0]:
- #       dest_box = element
- #       print("We found the dest in box: " + str(dest_box))    for element in mesh['boxes']:
         if int(element[0]) < source_point[0] and int(element[1]) > source_point[0] and int(element[2]) < source_point[1] and int(element[3]) > source_point[1]:
             source_box = element
             #print("We found the src in box: " + str(source_box))
@@ -62,6 +49,7 @@ def find_path(source_point, destination_point, mesh):
     while queue != []:
         node = heappop(queue)
         box = node[1]
+        print("Source box: " + str(box))
         current_dist = node[0]
 
         if box == dest_box:
@@ -74,13 +62,10 @@ def find_path(source_point, destination_point, mesh):
         for neighboor in mesh['adj'][box]:
             nx = None
             ny = None
-            if neighboor == dest_box:
-                nx = destination_point[1]
-                ny = destination_point[0]
-            else:
+
+            if neighboor not in detail_points:
                 max_x = max(box[2],neighboor[2])
                 min_x = min(box[3],neighboor[3])
-
                 max_y = max(box[0],neighboor[0])
                 min_y = min(box[1],neighboor[1])
 
@@ -98,8 +83,7 @@ def find_path(source_point, destination_point, mesh):
                 else:
                     ny = min_y
 
-            detail_points[neighboor] = (nx,ny)
-
+                detail_points[neighboor] = (nx,ny)
 
             heuristic = math.sqrt((detail_points[dest_box][1] - detail_points[neighboor][1])**2
                                 + (detail_points[dest_box][0] - detail_points[neighboor][0])**2)
@@ -116,23 +100,16 @@ def find_path(source_point, destination_point, mesh):
         print("No path found")
         return None
     else:
-        print("entered?")
         shortpath = []
         w = dest_box
         last = prev[w]
-        shortpath.append(((detail_points[last][1], detail_points[last][0]), (detail_points[w][1], detail_points[w][0])))
+        shortpath.append(((detail_points[last][1], detail_points[last][0]), (destination_point[0], destination_point[1])))
 
         while w != source_box:
-            #print(w)
             w = prev[last]
             shortpath.append(((detail_points[last][1], detail_points[last][0]), (detail_points[w][1], detail_points[w][0])))
             last = w
 
         shortpath.append(((detail_points[w][1], detail_points[w][0]), (source_point[0], source_point[1])))
         shortpath.reverse()
-        print(shortpath)
-        print(source_point)
-        print(detail_points[w])
-        print(destination_point)
-
         return shortpath, visited

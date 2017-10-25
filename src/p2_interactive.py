@@ -3,7 +3,6 @@ import random
 import pickle
 import traceback
 import tkinter
-
 import p2_pathfinder
 
 if len(sys.argv) != 4:
@@ -80,6 +79,7 @@ def on_click(event):
         except:
             destination_point = None
             traceback.print_exc()
+
 
     redraw()
 

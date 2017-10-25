@@ -24,15 +24,18 @@ def find_path(source_point, destination_point, mesh):
     for element in mesh['boxes']:
         if int(element[0]) < source_point[0] and int(element[1]) > source_point[0] and int(element[2]) < source_point[1] and int(element[3]) > source_point[1]:
             source_box = element
-            #print("We found the src in box: " + str(source_box))
 
         if int(element[0]) < destination_point[0] and int(element[1]) > destination_point[0] and int(element[2]) < destination_point[1] and int(element[3]) > destination_point[1]:
             dest_box = element
-            #print("We found the dest in box: " + str(dest_box))
 
     queue = []
     visited = []
     detail_points = {}
+    
+    if source_box == dest_box and source_box != None:
+        shortpath = []
+        shortpath.append(((destination_point[0],destination_point[1]), (source_point[0], source_point[1])))
+        return shortpath, visited
 
     dist = {}
     prev = {}
